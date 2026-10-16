@@ -1,6 +1,6 @@
 from datetime import UTC, datetime, timedelta
-from fastapi.security import OAuth2PasswordBearer
 
+from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 

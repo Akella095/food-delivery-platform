@@ -6,7 +6,7 @@ from app.database import get_db
 from app.messaging import EVENT_USER_REGISTERED, publish_event
 from app.metrics import USERS_REGISTERED_TOTAL
 from app.models import User
-from app.schemas import Token, UserCreate, UserLogin, UserOut
+from app.schemas import Token, UserCreate, UserOut
 from app.security import create_access_token, hash_password, verify_password
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
