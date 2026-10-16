@@ -12,10 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SECRET_KEY: ${{ secrets.SECRET_KEY || 'ci-test-secret-key' }}
-      ALGORITHM: HS256
+      ALGORITHM: ${{ secrets.ALGORITHM || 'HS256' }}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES || '60' }}
       DATABASE_URL: sqlite+aiosqlite:///./test.db
-      REDIS_URL: redis://localhost:6379/0
-      RABBITMQ_URL: amqp://guest:guest@localhost:5672/
+      REDIS_URL: ${{ secrets.REDIS_URL || 'redis://localhost:6379/0' }}
+      RABBITMQ_URL: ${{ secrets.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672/' }}
+      CACHE_TTL_SECONDS: ${{ secrets.CACHE_TTL_SECONDS || '60' }}
     defaults:
       run:
         working-directory: user-service
@@ -46,10 +48,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SECRET_KEY: ${{ secrets.SECRET_KEY || 'ci-test-secret-key' }}
-      ALGORITHM: HS256
+      ALGORITHM: ${{ secrets.ALGORITHM || 'HS256' }}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES || '60' }}
       DATABASE_URL: sqlite+aiosqlite:///./test.db
-      REDIS_URL: redis://localhost:6379/0
-      RABBITMQ_URL: amqp://guest:guest@localhost:5672/
+      REDIS_URL: ${{ secrets.REDIS_URL || 'redis://localhost:6379/0' }}
+      RABBITMQ_URL: ${{ secrets.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672/' }}
+      CACHE_TTL_SECONDS: ${{ secrets.CACHE_TTL_SECONDS || '60' }}
     defaults:
       run:
         working-directory: order-service
