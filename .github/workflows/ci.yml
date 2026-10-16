@@ -36,10 +36,10 @@ jobs:
           pip install ruff
 
       - name: Lint with ruff
-        run: ruff check app tests
+        run: ruff check app
 
       - name: Run tests
-        run: pytest tests/ -v
+        run: python -m pytest tests/ -v
 
   test-order-service:
     name: Lint & Test order-service
@@ -70,10 +70,10 @@ jobs:
           pip install ruff
 
       - name: Lint with ruff
-        run: ruff check app tests
+        run: ruff check app
 
       - name: Run tests
-        run: pytest tests/ -v
+        run: python -m pytest tests/ -v
 
   build-images:
     name: Build Docker images
