@@ -1,0 +1,154 @@
+version: "3.9"
+
+x-common-env: &common-env
+  SECRET_KEY: ${SECRET_KEY}
+  ALGORITHM: ${ALGORITHM}
+  ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+  REDIS_URL: ${REDIS_URL}
+  RABBITMQ_URL: ${RABBITMQ_URL}
+  CACHE_TTL_SECONDS: ${CACHE_TTL_SECONDS}
+
+services:
+  user-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${USER_DB_USER}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
+      POSTGRES_DB: ${USER_DB_NAME}
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${USER_DB_USER} -d ${USER_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  order-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${ORDER_DB_USER}
+      POSTGRES_PASSWORD: ${ORDER_DB_PASSWORD}
+      POSTGRES_DB: ${ORDER_DB_NAME}
+    volumes:
+      - order_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ORDER_DB_USER} -d ${ORDER_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  user-service:
+    build: ./user-service
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      DATABASE_URL: ${USER_DATABASE_URL}
+    depends_on:
+      user-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  order-service-1:
+    build: ./order-service
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      DATABASE_URL: ${ORDER_DATABASE_URL}
+    depends_on:
+      order-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  order-service-2:
+    build: ./order-service
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      DATABASE_URL: ${ORDER_DATABASE_URL}
+    depends_on:
+      order-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      user-service:
+        condition: service_healthy
+      order-service-1:
+        condition: service_healthy
+      order-service-2:
+        condition: service_healthy
+
+volumes:
+  user_db_data:
+  order_db_data:
+  redis_data:
+  rabbitmq_data:

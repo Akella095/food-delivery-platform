@@ -1,0 +1,34 @@
+# Автоматически определять текстовые файлы
+* text=auto eol=lf
+
+# Явно указать LF для всех исходников, конфигов и Docker-файлов
+*.py       text eol=lf
+*.pyi      text eol=lf
+*.txt      text eol=lf
+*.md       text eol=lf
+*.yml      text eol=lf
+*.yaml     text eol=lf
+*.toml     text eol=lf
+*.ini      text eol=lf
+*.cfg      text eol=lf
+*.json     text eol=lf
+*.conf     text eol=lf
+Dockerfile text eol=lf
+*.sh       text eol=lf
+
+# Windows-специфичные файлы
+*.bat      text eol=crlf
+*.cmd      text eol=crlf
+*.ps1      text eol=crlf
+
+# Бинарные — не трогать
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.ico      binary
+*.pdf      binary
+*.zip      binary
+*.gz       binary
+*.woff     binary
+*.woff2    binary
